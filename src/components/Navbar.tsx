@@ -109,7 +109,7 @@ export default function Navbar({ activeSection = "" }: NavbarProps) {
           {/* Download CV */}
           <a
             href={PERSONAL_INFO.cvUrl}
-            download="Houssein_Tlili_CV.pdf"
+            download="CV Houssein Tlili.pdf"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl transition-all duration-200 hover:bg-yellow-500/10 hover:border-yellow-400 hover:scale-105"
@@ -181,7 +181,7 @@ export default function Navbar({ activeSection = "" }: NavbarProps) {
 
             <a
               href={PERSONAL_INFO.cvUrl}
-              download="Houssein_Tlili_CV.pdf"
+              download="CV Houssein Tlili.pdf"
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}
