@@ -6,17 +6,55 @@ import { UI_TRANSLATIONS } from "../data/translations";
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
 
   const { lang, isRtl } = useLanguage();
   const t = UI_TRANSLATIONS[lang].contact;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const sendingLabel = lang === "ar" ? "جاري الإرسال..." : lang === "fr" ? "Envoi en cours..." : "Sending...";
+  const errorLabel = lang === "ar" ? "تعذر الإرسال، حاول مجدداً" : lang === "fr" ? "Échec de l'envoi, réessayez" : "Failed to send, please try again";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4500);
-    setForm({ name: "", email: "", message: "" });
+    if (status === "sending") return;
+
+    setStatus("sending");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "5e5e8c47-b75e-4a99-a22b-f4be4ed8760f",
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          subject: `Portfolio message from ${form.name}`,
+          from_name: `${form.name} (Portfolio)`,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setStatus("success");
+        setForm({ name: "", email: "", message: "" });
+        setTimeout(() => setStatus("idle"), 6000);
+      } else {
+        setStatus("error");
+        setErrorMessage(result.message || errorLabel);
+        setTimeout(() => setStatus("idle"), 5000);
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage(errorLabel);
+      setTimeout(() => setStatus("idle"), 5000);
+    }
   };
 
   const copyEmail = () => {
@@ -231,21 +269,47 @@ export default function ContactSection() {
                 />
               </div>
 
+              {status === "error" && (
+                <div className="p-3 rounded-xl text-xs font-mono-tech border border-red-500/40 bg-red-500/10 text-red-300 text-center">
+                  {errorMessage || errorLabel}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-95 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                disabled={status === "sending"}
+                className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                  status === "sending" ? "opacity-75 cursor-not-allowed" : "hover:opacity-95 hover:scale-[1.01] active:scale-[0.99]"
+                }`}
                 style={{
-                  background: sent
+                  background: status === "success"
                     ? "linear-gradient(135deg, #2E5FA3, #3FB950)"
+                    : status === "error"
+                    ? "linear-gradient(135deg, #991B1B, #DC2626)"
                     : "linear-gradient(135deg, #C9A84C, #a8893e)",
-                  color: sent ? "#E6EDF3" : "#0D1117",
+                  color: (status === "success" || status === "error" || status === "sending") ? "#E6EDF3" : "#0D1117",
                   fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
-                  boxShadow: sent
+                  boxShadow: status === "success"
                     ? "0 0 24px rgba(63,185,80,0.3)"
                     : "0 0 24px rgba(201,168,76,0.25)",
                 }}
               >
-                {sent ? t.messageSent : t.sendMessage}
+                {status === "sending" && (
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                )}
+                {status === "success" && <IconCheck size={16} />}
+                <span>
+                  {status === "sending"
+                    ? sendingLabel
+                    : status === "success"
+                    ? t.messageSent
+                    : status === "error"
+                    ? errorLabel
+                    : t.sendMessage}
+                </span>
               </button>
             </form>
           </div>
