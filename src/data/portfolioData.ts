@@ -62,7 +62,7 @@ export const PERSONAL_INFO = {
   email: "tlilihussein@gmail.com",
   github: "https://github.com/HousseinTlili",
   linkedin: "https://www.linkedin.com/in/tlili-houssein-7a575a317/",
-  cvUrl: "/cv.pdf",
+  cvUrl: "/CV%20Houssein%20Tlili.pdf",
 };
 
 export const PROJECTS: Project[] = [
