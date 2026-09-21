@@ -9,7 +9,7 @@
 
 **Sovereign AI Systems · Microservices Architecture · Distributed Computing · Desktop Applications**
 
-[🌐 LinkedIn](https://www.linkedin.com/in/tlili-houssein-7a575a317/) · [💻 GitHub](https://github.com/HousseinTlili) · [📧 Email](mailto:tlilihussein@gmail.com)
+[🚀 Live Portfolio](https://portfolio-ruddy-three-67.vercel.app/) · [🌐 LinkedIn](https://www.linkedin.com/in/tlili-houssein-7a575a317/) · [💻 GitHub](https://github.com/HousseinTlili) · [📧 Email](mailto:tlilihussein@gmail.com)
 
 </div>
 
@@ -114,7 +114,7 @@ A modern, high-performance developer portfolio built with **React 19**, **TypeSc
 
 ## 📬 Contact & Connect
 
-- **Portfolio**: [https://housseintlili.me](https://github.com/HousseinTlili) *(or your deployed Vercel link)*
+- **Portfolio**: [portfolio-ruddy-three-67.vercel.app](https://portfolio-ruddy-three-67.vercel.app/)
 - **LinkedIn**: [linkedin.com/in/tlili-houssein-7a575a317](https://www.linkedin.com/in/tlili-houssein-7a575a317/)
 - **GitHub**: [@HousseinTlili](https://github.com/HousseinTlili)
 - **Email**: [tlilihussein@gmail.com](mailto:tlilihussein@gmail.com)
