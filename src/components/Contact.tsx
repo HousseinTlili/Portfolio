@@ -3,6 +3,36 @@ import { IconGithub, IconLinkedin, IconMail, IconCheck } from "./Icons";
 import { PERSONAL_INFO } from "../data/portfolioData";
 import { useLanguage } from "../context/LanguageContext";
 import { UI_TRANSLATIONS } from "../data/translations";
+import { useMagneticEffect } from "../hooks/useMagneticEffect";
+
+function MagneticLink({ children, href, label }: { children: React.ReactNode; href: string; label: string }) {
+  const ref = useMagneticEffect<HTMLAnchorElement>({ strength: 0.3 });
+  return (
+    <a
+      ref={ref}
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={label}
+      className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
+      style={{
+        background: "rgba(22, 27, 34, 0.8)",
+        border: "1px solid rgba(48, 54, 61, 0.8)",
+        color: "#8B949E",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.color = "#58A6FF";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,166,255,0.4)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.color = "#8B949E";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(48,54,61,0.8)";
+      }}
+    >
+      {children}
+    </a>
+  );
+}
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -154,29 +184,9 @@ export default function ContactSection() {
                 { icon: <IconLinkedin size={20} />, href: PERSONAL_INFO.linkedin, label: "LinkedIn Profile" },
                 { icon: <IconMail size={20} />, href: `mailto:${PERSONAL_INFO.email}`, label: "Send Direct Email" },
               ].map(({ icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={label}
-                  className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
-                  style={{
-                    background: "rgba(22, 27, 34, 0.8)",
-                    border: "1px solid rgba(48, 54, 61, 0.8)",
-                    color: "#8B949E",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "#58A6FF";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,166,255,0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "#8B949E";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(48,54,61,0.8)";
-                  }}
-                >
+                <MagneticLink key={label} href={href} label={label}>
                   {icon}
-                </a>
+                </MagneticLink>
               ))}
             </div>
           </div>

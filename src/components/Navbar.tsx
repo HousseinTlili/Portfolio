@@ -4,6 +4,7 @@ import { PERSONAL_INFO } from "../data/portfolioData";
 import { useLanguage } from "../context/LanguageContext";
 import { UI_TRANSLATIONS } from "../data/translations";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useMagneticEffect } from "../hooks/useMagneticEffect";
 
 interface NavbarProps {
   activeSection?: string;
@@ -29,6 +30,8 @@ export default function Navbar({ activeSection = "" }: NavbarProps) {
       document.body.style.overflow = "";
     }
   }, [mobileMenuOpen]);
+
+  const downloadCvRef = useMagneticEffect<HTMLAnchorElement>({ strength: 0.25 });
 
   const navLinks = [
     { id: "about", label: t.about, href: "#about" },
@@ -108,6 +111,7 @@ export default function Navbar({ activeSection = "" }: NavbarProps) {
 
           {/* Download CV */}
           <a
+            ref={downloadCvRef}
             href={PERSONAL_INFO.cvUrl}
             download="CV Houssein Tlili.pdf"
             target="_blank"

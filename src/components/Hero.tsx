@@ -3,10 +3,26 @@ import { IconGithub, IconLinkedin, IconMail, FlagTN } from "./Icons";
 import { PERSONAL_INFO } from "../data/portfolioData";
 import { useLanguage } from "../context/LanguageContext";
 import { UI_TRANSLATIONS } from "../data/translations";
+import ParticlePortrait from "./ParticlePortrait";
+import NeuralBackground from "./NeuralBackground";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useTextScramble } from "../hooks/useTextScramble";
+import { useMagneticEffect } from "../hooks/useMagneticEffect";
+
+function MagneticItem({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useMagneticEffect<HTMLDivElement>({ strength: 0.3 });
+  return <div ref={ref} className={`inline-block ${className}`}>{children}</div>;
+}
 
 export default function HeroSection() {
   const { lang, isRtl } = useLanguage();
   const t = UI_TRANSLATIONS[lang].hero;
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  // Cyber text scramble for headline
+  const line1 = useTextScramble(t.building, { enabled: !isRtl, speed: 28 });
+  const line2 = useTextScramble(t.intelligent, { enabled: !isRtl, speed: 28 });
+  const line3 = useTextScramble(t.systems, { enabled: !isRtl, speed: 28 });
 
   return (
     <section
@@ -15,8 +31,11 @@ export default function HeroSection() {
       style={{ background: "#0D1117" }}
       aria-label="Hero Section"
     >
+      {/* Interactive Neural Network node background for desktop */}
+      {isDesktop && <NeuralBackground />}
+
       {/* Grid background pattern */}
-      <div className="absolute inset-0 grid-bg opacity-35 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
 
       {/* Radial accent glow */}
       <div
@@ -26,7 +45,7 @@ export default function HeroSection() {
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-6 py-16 w-full">
+      <div className="relative max-w-6xl mx-auto px-6 py-16 w-full z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column (Content) */}
           <div className="lg:col-span-7 z-10">
@@ -44,16 +63,22 @@ export default function HeroSection() {
               </span>
             </div>
 
-            {/* Headline */}
+            {/* Headline with Cyber Text Scramble */}
             <h1
               className="text-5xl sm:text-6xl md:text-7xl font-bold leading-[1.12] mb-6 animate-fade-in-up delay-100"
               style={{ fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif" }}
             >
-              <span style={{ color: "#8B949E" }}>{t.building}</span>
+              <span ref={line1.elementRef} style={{ color: "#8B949E" }}>
+                {line1.displayText}
+              </span>
               <br />
-              <span className="gradient-text">{t.intelligent}</span>
+              <span ref={line2.elementRef} className="gradient-text">
+                {line2.displayText}
+              </span>
               <br />
-              <span style={{ color: "#E6EDF3" }}>{t.systems}</span>
+              <span ref={line3.elementRef} style={{ color: "#E6EDF3" }}>
+                {line3.displayText}
+              </span>
             </h1>
 
             {/* Subtitle */}
@@ -64,33 +89,37 @@ export default function HeroSection() {
               {t.subtitle}
             </p>
 
-            {/* CTAs */}
+            {/* CTAs with Magnetic Physics */}
             <div className="flex flex-wrap items-center gap-4 mb-10 animate-fade-in-up delay-300">
-              <a
-                href="#projects"
-                className="px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-95 hover:scale-105 active:scale-95 text-center"
-                style={{
-                  background: "linear-gradient(135deg, #2E5FA3, #1c4275)",
-                  color: "#E6EDF3",
-                  fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
-                  boxShadow: "0 0 28px rgba(88,166,255,0.25)",
-                  border: "1px solid rgba(88,166,255,0.3)",
-                }}
-              >
-                {t.exploreProjects}
-              </a>
-              <a
-                href="#contact"
-                className="px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:bg-blue-500/10 hover:border-blue-400 text-center"
-                style={{
-                  border: "1px solid rgba(88,166,255,0.4)",
-                  color: "#58A6FF",
-                  fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
-                  background: "rgba(22, 27, 34, 0.4)",
-                }}
-              >
-                {t.getInTouch}
-              </a>
+              <MagneticItem>
+                <a
+                  href="#projects"
+                  className="inline-block px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-95 text-center shadow-[0_0_28px_rgba(88,166,255,0.25)]"
+                  style={{
+                    background: "linear-gradient(135deg, #2E5FA3, #1c4275)",
+                    color: "#E6EDF3",
+                    fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
+                    border: "1px solid rgba(88,166,255,0.3)",
+                  }}
+                >
+                  {t.exploreProjects}
+                </a>
+              </MagneticItem>
+
+              <MagneticItem>
+                <a
+                  href="#contact"
+                  className="inline-block px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:bg-blue-500/10 hover:border-blue-400 text-center"
+                  style={{
+                    border: "1px solid rgba(88,166,255,0.4)",
+                    color: "#58A6FF",
+                    fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
+                    background: "rgba(22, 27, 34, 0.4)",
+                  }}
+                >
+                  {t.getInTouch}
+                </a>
+              </MagneticItem>
             </div>
 
             {/* Social icons & location */}
@@ -101,31 +130,32 @@ export default function HeroSection() {
                   { icon: <IconLinkedin size={19} />, href: PERSONAL_INFO.linkedin, label: "LinkedIn Profile" },
                   { icon: <IconMail size={19} />, href: `mailto:${PERSONAL_INFO.email}`, label: "Send Email" },
                 ].map(({ icon, href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={label}
-                    className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-                    style={{
-                      background: "rgba(22, 27, 34, 0.8)",
-                      border: "1px solid rgba(48, 54, 61, 0.8)",
-                      color: "#8B949E",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#58A6FF";
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,166,255,0.4)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "0 0 16px rgba(88,166,255,0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#8B949E";
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(48,54,61,0.8)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                    }}
-                  >
-                    {icon}
-                  </a>
+                  <MagneticItem key={label}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={label}
+                      className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                      style={{
+                        background: "rgba(22, 27, 34, 0.8)",
+                        border: "1px solid rgba(48, 54, 61, 0.8)",
+                        color: "#8B949E",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "#58A6FF";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,166,255,0.4)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 0 16px rgba(88,166,255,0.15)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "#8B949E";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(48,54,61,0.8)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                      }}
+                    >
+                      {icon}
+                    </a>
+                  </MagneticItem>
                 ))}
               </div>
               <span className="text-xs font-mono-tech text-[#768390] inline-flex items-center gap-1.5">
@@ -134,7 +164,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column (Avatar & Badges) */}
+          {/* Right Column (Avatar Particle Canvas & Badges) */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center animate-fade-in-up delay-300">
             <div className="relative w-64 h-80 sm:w-72 sm:h-96 md:w-80 md:h-[26rem] group">
               {/* Ambient blur glow behind frame */}
@@ -154,18 +184,26 @@ export default function HeroSection() {
                 }}
               >
                 <div className="relative w-full h-full rounded-[22px] overflow-hidden bg-[#161B22]">
-                  <img
-                    src="/profile.png"
-                    alt="Houssein Tlili - Software & AI Engineer"
-                    className="w-full h-full object-cover object-top filter contrast-[103%] brightness-[98%] transition-transform duration-700 group-hover:scale-105"
-                  />
+                  {/* Flagship Particle Portrait for desktop, optimized image for mobile */}
+                  {isDesktop ? (
+                    <ParticlePortrait
+                      imageSrc="/profile.png"
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <img
+                      src="/profile.png"
+                      alt="Houssein Tlili - Software & AI Engineer"
+                      className="w-full h-full object-cover object-top filter contrast-[103%] brightness-[98%]"
+                    />
+                  )}
 
                   {/* Subtle dark gradient overlay at bottom for depth */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0D1117]/85 via-transparent to-transparent pointer-events-none" />
 
                   {/* Glass Status Chip overlay pinned at bottom */}
                   <div
-                    className="absolute bottom-3 inset-x-3 p-2.5 rounded-xl flex items-center justify-between backdrop-blur-md border border-white/10 shadow-lg"
+                    className="absolute bottom-3 inset-x-3 p-2.5 rounded-xl flex items-center justify-between backdrop-blur-md border border-white/10 shadow-lg pointer-events-none"
                     style={{ background: "rgba(13, 17, 23, 0.78)" }}
                   >
                     <div className="flex items-center gap-2">
@@ -210,7 +248,7 @@ export default function HeroSection() {
       {/* Scroll indicator */}
       <a
         href="#about"
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group transition-opacity hover:opacity-100 opacity-70"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group transition-opacity hover:opacity-100 opacity-70 z-10"
         aria-label="Scroll to About section"
       >
         <span className="text-[11px] font-mono-tech uppercase tracking-widest text-[#8B949E] group-hover:text-[#58A6FF] transition-colors">

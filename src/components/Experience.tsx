@@ -1,6 +1,79 @@
 import React from "react";
 import { useLanguage } from "../context/LanguageContext";
 import { UI_TRANSLATIONS, getLocalizedExperiences } from "../data/translations";
+import { useTiltEffect } from "../hooks/useTiltEffect";
+
+function ExperienceCard({
+  entry,
+  isRtl,
+}: {
+  entry: any;
+  isRtl: boolean;
+}) {
+  const cardRef = useTiltEffect<HTMLDivElement>({ maxTilt: 7, scale: 1.02 });
+
+  return (
+    <div
+      ref={cardRef}
+      className="w-full md:w-[calc(50%-2.25rem)] card-hover tilt-card rounded-xl p-6 overflow-hidden"
+      style={{
+        background: "rgba(22, 27, 34, 0.75)",
+        backdropFilter: "blur(12px)",
+        border: "1px solid rgba(48, 54, 61, 0.7)",
+        borderTop: `3px solid ${entry.color}`,
+      }}
+    >
+      <div className="relative z-10">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span
+            className="text-xs font-mono-tech px-2.5 py-1 rounded"
+            style={{
+              background: `${entry.color}15`,
+              color: entry.color,
+              border: `1px solid ${entry.color}35`,
+            }}
+          >
+            {entry.tag}
+          </span>
+          <span
+            className="text-xs font-mono-tech text-[#8B949E]"
+            dir={isRtl ? "rtl" : "ltr"}
+          >
+            <bdi>{entry.period}</bdi>
+          </span>
+        </div>
+
+        <h3
+          className="text-lg font-bold mt-2 mb-0.5"
+          style={{
+            fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
+            color: "#E6EDF3",
+          }}
+        >
+          {entry.company}
+        </h3>
+        <p className="text-sm font-medium mb-4" style={{ color: entry.color }}>
+          {entry.role}
+        </p>
+
+        <ul className="space-y-2.5">
+          {entry.bullets.map((bullet: string, bIdx: number) => (
+            <li
+              key={bIdx}
+              className="flex items-start gap-2.5 text-xs sm:text-sm text-[#8B949E] leading-relaxed"
+            >
+              <span
+                className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ background: entry.color }}
+              />
+              <span>{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 export default function ExperienceSection() {
   const { lang, isRtl } = useLanguage();
@@ -51,8 +124,6 @@ export default function ExperienceSection() {
               const isEven = idx % 2 === 0;
 
               // Alternating sides on desktop:
-              // In LTR: entry 0 is right (justify-end), entry 1 is left (justify-start)
-              // In RTL: entry 0 is right (justify-start in RTL), entry 1 is left (justify-end in RTL)
               const justifyClass = isRtl
                 ? (isEven ? "md:justify-start" : "md:justify-end")
                 : (isEven ? "md:justify-end" : "md:justify-start");
@@ -79,63 +150,8 @@ export default function ExperienceSection() {
                     }}
                   />
 
-                  {/* Content Card with dedicated spacing from center line */}
-                  <div
-                    className="w-full md:w-[calc(50%-2.25rem)] card-hover rounded-xl p-6"
-                    style={{
-                      background: "rgba(22, 27, 34, 0.75)",
-                      backdropFilter: "blur(12px)",
-                      border: "1px solid rgba(48, 54, 61, 0.7)",
-                      borderTop: `3px solid ${entry.color}`,
-                    }}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <span
-                        className="text-xs font-mono-tech px-2.5 py-1 rounded"
-                        style={{
-                          background: `${entry.color}15`,
-                          color: entry.color,
-                          border: `1px solid ${entry.color}35`,
-                        }}
-                      >
-                        {entry.tag}
-                      </span>
-                      <span
-                        className="text-xs font-mono-tech text-[#8B949E]"
-                        dir={isRtl ? "rtl" : "ltr"}
-                      >
-                        <bdi>{entry.period}</bdi>
-                      </span>
-                    </div>
-
-                    <h3
-                      className="text-lg font-bold mt-2 mb-0.5"
-                      style={{
-                        fontFamily: isRtl ? "'Cairo', sans-serif" : "'Space Grotesk', sans-serif",
-                        color: "#E6EDF3",
-                      }}
-                    >
-                      {entry.company}
-                    </h3>
-                    <p className="text-sm font-medium mb-4" style={{ color: entry.color }}>
-                      {entry.role}
-                    </p>
-
-                    <ul className="space-y-2.5">
-                      {entry.bullets.map((bullet, bIdx) => (
-                        <li
-                          key={bIdx}
-                          className="flex items-start gap-2.5 text-xs sm:text-sm text-[#8B949E] leading-relaxed"
-                        >
-                          <span
-                            className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ background: entry.color }}
-                          />
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* 3D Tilt Experience Card with Spotlight */}
+                  <ExperienceCard entry={entry} isRtl={isRtl} />
                 </div>
               );
             })}

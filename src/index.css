@@ -101,6 +101,33 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(48, 54, 61, 0.8);
 }
 
+/* Spotlight & 3D Tilt Card */
+.tilt-card {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(88, 166, 255, 0.12),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.tilt-card:hover::before {
+  opacity: 1;
+}
+
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, #58A6FF 0%, #C9A84C 100%);

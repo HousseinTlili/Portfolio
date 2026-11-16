@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
+import ScrollProgress from "./components/ScrollProgress";
 import HeroSection from "./components/Hero";
 import AboutSection from "./components/About";
 import ProjectsSection from "./components/Projects";
@@ -63,6 +64,9 @@ function PortfolioContent() {
       className="min-h-screen text-[#E6EDF3] selection:bg-[#58A6FF]/25 selection:text-white transition-colors duration-300"
       style={{ background: "#0D1117" }}
     >
+      {/* Top scroll progress indicator */}
+      <ScrollProgress />
+
       {/* Navigation bar with mobile menu, active section spy, and Language Switcher */}
       <Navbar activeSection={activeSection} />
 
