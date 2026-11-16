@@ -1,111 +1,38 @@
-import React, { useEffect, useState } from "react";
-import Navbar from "./components/Navbar";
-import ScrollProgress from "./components/ScrollProgress";
-import HeroSection from "./components/Hero";
-import AboutSection from "./components/About";
-import ProjectsSection from "./components/Projects";
-import ProjectModal from "./components/ProjectModal";
-import ExperienceSection from "./components/Experience";
-import EducationSection from "./components/Education";
-import ContactSection from "./components/Contact";
-import Footer from "./components/Footer";
-import { Project } from "./data/portfolioData";
-import { LanguageProvider, useLanguage } from "./context/LanguageContext";
+import { lazy, Suspense, useEffect, useState } from "react";
+import Portfolio from "./portfolio/Portfolio";
 
-function PortfolioContent() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [activeSection, setActiveSection] = useState<string>("hero");
+const Resume = lazy(() => import("./resume/Resume"));
 
-  const { lang } = useLanguage();
-
-  // Scroll reveal observer for elements with .reveal, .reveal-left, .reveal-right
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
-    );
-
-    const elements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right");
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [lang]);
-
-  // ScrollSpy observer to track which section is currently active for Navbar
-  useEffect(() => {
-    const sections = ["hero", "about", "projects", "experience", "education", "contact"];
-    const sectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.25 }
-    );
-
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) sectionObserver.observe(el);
-    });
-
-    return () => sectionObserver.disconnect();
-  }, []);
-
-  return (
-    <div
-      className="min-h-screen text-[#E6EDF3] selection:bg-[#58A6FF]/25 selection:text-white transition-colors duration-300"
-      style={{ background: "#0D1117" }}
-    >
-      {/* Top scroll progress indicator */}
-      <ScrollProgress />
-
-      {/* Navigation bar with mobile menu, active section spy, and Language Switcher */}
-      <Navbar activeSection={activeSection} />
-
-      <main>
-        {/* Hero */}
-        <HeroSection />
-
-        {/* About */}
-        <AboutSection />
-
-        {/* Projects with filter tabs and case study trigger */}
-        <ProjectsSection onSelectProject={(project) => setSelectedProject(project)} />
-
-        {/* Experience with responsive timeline */}
-        <ExperienceSection />
-
-        {/* Education */}
-        <EducationSection />
-
-        {/* Contact */}
-        <ContactSection />
-      </main>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Project Case Study / Architecture Modal */}
-      <ProjectModal
-        project={selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
-    </div>
-  );
-}
+const isResumeHash = () => window.location.hash === "#cv";
 
 export default function App() {
-  return (
-    <LanguageProvider>
-      <PortfolioContent />
-    </LanguageProvider>
+  const [showResume, setShowResume] = useState(isResumeHash);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const next = isResumeHash();
+      setShowResume((current) => {
+        if (current !== next) window.scrollTo({ top: 0 });
+        return next;
+      });
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (!showResume) return;
+    const root = document.documentElement;
+    root.lang = "fr";
+    root.dir = "ltr";
+    document.title = "CV — Tlili Houssein";
+  }, [showResume]);
+
+  return showResume ? (
+    <Suspense fallback={<div className="min-h-screen bg-[#e9edf4]" />}>
+      <Resume />
+    </Suspense>
+  ) : (
+    <Portfolio />
   );
 }
