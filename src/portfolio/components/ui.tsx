@@ -20,19 +20,17 @@ export function LinkedinIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 export function MagneticLink({
-  strength = 0.3,
+  strength: _strength,
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement> & { strength?: number }) {
-  const { ref } = useMagneticEffect<HTMLAnchorElement>({ strength });
-  return <a ref={ref} {...props} />;
+  return <a {...props} />;
 }
 
 export function MagneticButton({
-  strength = 0.3,
+  strength: _strength,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { strength?: number }) {
-  const { ref } = useMagneticEffect<HTMLButtonElement>({ strength });
-  return <button ref={ref} {...props} />;
+  return <button {...props} />;
 }
 
 export function SectionHeading({
