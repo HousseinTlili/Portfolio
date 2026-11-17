@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { ArrowDown, ArrowUpRight, Mail, MousePointer2 } from "lucide-react";
 import { marquee, profile, type Dict, type Lang } from "../content";
-import { useIsDesktop, useReducedMotion } from "../hooks/useMediaQuery";
+import { useReducedMotion } from "../hooks/useMediaQuery";
 import NeuralBackground from "./NeuralBackground";
 import ParticlePortrait from "./ParticlePortrait";
 import ScrambleText from "./ScrambleText";
@@ -10,10 +10,9 @@ import { GithubIcon, LinkedinIcon, MagneticLink } from "./ui";
 const STAT_VALUES = ["< 30 s", "97.96%", "740+", "2"];
 
 export default function Hero({ t, lang }: { t: Dict; lang: Lang }) {
-  const isDesktop = useIsDesktop();
   const reduced = useReducedMotion();
   const scramble = lang !== "ar";
-  const showOrbs = isDesktop && !reduced;
+  const showOrbs = !reduced;
   const sectionRef = useRef<HTMLElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
 
@@ -25,7 +24,7 @@ export default function Hero({ t, lang }: { t: Dict; lang: Lang }) {
 
   return (
     <section id="home" ref={sectionRef} className="relative isolate overflow-hidden pt-28 md:pt-32">
-      {isDesktop && !reduced && <NeuralBackground />}
+      {!reduced && <NeuralBackground />}
       <div className="pf-grid-bg pointer-events-none absolute inset-0 -z-10 opacity-40" />
       <div className="pf-hero-glow pointer-events-none absolute inset-0 -z-10" />
       {showOrbs && (

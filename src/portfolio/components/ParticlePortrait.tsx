@@ -99,7 +99,8 @@ export default function ParticlePortrait({
 
       let opaque = 0;
       for (let i = 3; i < data.length; i += 16) if ((data[i] ?? 0) > 140) opaque += 4;
-      const stride = Math.max(2, Math.sqrt(opaque / ORB_BUDGET));
+      const budget = width < 768 ? 1600 : ORB_BUDGET;
+      const stride = Math.max(2, Math.sqrt(opaque / budget));
 
       const span = Math.max(width, height);
       const centerX = sampleW / 2;
@@ -305,6 +306,9 @@ export default function ParticlePortrait({
     });
     intersection.observe(container);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerMove, { passive: true });
+    window.addEventListener("pointerup", onPointerLeave, { passive: true });
+    window.addEventListener("pointercancel", onPointerLeave, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
 
     return () => {
@@ -312,6 +316,9 @@ export default function ParticlePortrait({
       resizeObserver.disconnect();
       intersection.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerMove);
+      window.removeEventListener("pointerup", onPointerLeave);
+      window.removeEventListener("pointercancel", onPointerLeave);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
     };
   }, [imageSrc, containerRef, anchorRef]);

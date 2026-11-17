@@ -37,8 +37,9 @@ export default function NeuralBackground() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      if (!nodes.length) {
-        for (let i = 0; i < NODE_COUNT; i += 1) {
+      const targetCount = width < 768 ? 28 : NODE_COUNT;
+      if (nodes.length < targetCount) {
+        for (let i = nodes.length; i < targetCount; i += 1) {
           const angle = Math.random() * Math.PI * 2;
           const speed = 0.2 + Math.random() * 0.3;
           nodes.push({
@@ -48,6 +49,8 @@ export default function NeuralBackground() {
             vy: Math.sin(angle) * speed,
           });
         }
+      } else if (nodes.length > targetCount) {
+        nodes.length = targetCount;
       }
     };
 
@@ -134,6 +137,9 @@ export default function NeuralBackground() {
     });
     intersection.observe(canvas);
     window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onMove, { passive: true });
+    window.addEventListener("pointerup", onLeave, { passive: true });
+    window.addEventListener("pointercancel", onLeave, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
     start();
 
@@ -142,6 +148,9 @@ export default function NeuralBackground() {
       resizeObserver.disconnect();
       intersection.disconnect();
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onMove);
+      window.removeEventListener("pointerup", onLeave);
+      window.removeEventListener("pointercancel", onLeave);
       document.documentElement.removeEventListener("pointerleave", onLeave);
     };
   }, []);
