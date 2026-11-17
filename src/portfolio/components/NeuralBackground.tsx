@@ -8,8 +8,8 @@ interface Node {
 }
 
 const NODE_COUNT = 60;
-const LINK_DISTANCE = 150;
-const MOUSE_RADIUS = 200;
+const LINK_DISTANCE = 160;
+const MOUSE_RADIUS = 210;
 
 export default function NeuralBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,11 +37,11 @@ export default function NeuralBackground() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const targetCount = width < 768 ? 28 : NODE_COUNT;
+      const targetCount = width < 768 ? 32 : NODE_COUNT;
       if (nodes.length < targetCount) {
         for (let i = nodes.length; i < targetCount; i += 1) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = 0.2 + Math.random() * 0.3;
+          const speed = 0.35 + Math.random() * 0.45;
           nodes.push({
             x: Math.random() * width,
             y: Math.random() * height,
@@ -59,23 +59,28 @@ export default function NeuralBackground() {
       if (!visible) return;
       ctx.clearRect(0, 0, width, height);
 
+      const tSec = performance.now() * 0.001;
+      const autoX = width * (0.5 + 0.38 * Math.sin(tSec * 0.45));
+      const autoY = height * (0.5 + 0.38 * Math.cos(tSec * 0.32));
+      const focalX = mouse.active ? mouse.x : autoX;
+      const focalY = mouse.active ? mouse.y : autoY;
+
       for (const node of nodes) {
-        if (mouse.active) {
-          const dx = mouse.x - node.x;
-          const dy = mouse.y - node.y;
-          const distance = Math.hypot(dx, dy);
-          if (distance < MOUSE_RADIUS && distance > 40) {
-            const pull = 0.01 * (1 - distance / MOUSE_RADIUS);
-            node.x += dx * pull;
-            node.y += dy * pull;
-          }
+        const dx = focalX - node.x;
+        const dy = focalY - node.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance < MOUSE_RADIUS && distance > 30) {
+          const pull = (mouse.active ? 0.012 : 0.006) * (1 - distance / MOUSE_RADIUS);
+          node.x += dx * pull;
+          node.y += dy * pull;
         }
+
         node.x += node.vx;
         node.y += node.vy;
-        if (node.x < -10) node.x = width + 10;
-        if (node.x > width + 10) node.x = -10;
-        if (node.y < -10) node.y = height + 10;
-        if (node.y > height + 10) node.y = -10;
+        if (node.x < -15) node.x = width + 15;
+        if (node.x > width + 15) node.x = -15;
+        if (node.y < -15) node.y = height + 15;
+        if (node.y > height + 15) node.y = -15;
       }
 
       ctx.lineWidth = 1;
@@ -85,29 +90,30 @@ export default function NeuralBackground() {
           const b = nodes[j]!;
           const distance = Math.hypot(a.x - b.x, a.y - b.y);
           if (distance < LINK_DISTANCE) {
-            ctx.strokeStyle = `rgba(88,166,255,${(1 - distance / LINK_DISTANCE) * 0.22})`;
+            const alpha = (1 - distance / LINK_DISTANCE) * 0.35;
+            ctx.strokeStyle = `rgba(88,166,255,${alpha.toFixed(3)})`;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
         }
-        if (mouse.active) {
-          const distance = Math.hypot(a.x - mouse.x, a.y - mouse.y);
-          if (distance < MOUSE_RADIUS) {
-            ctx.strokeStyle = `rgba(201,168,76,${(1 - distance / MOUSE_RADIUS) * 0.18})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-          }
+
+        const focalDist = Math.hypot(a.x - focalX, a.y - focalY);
+        if (focalDist < MOUSE_RADIUS) {
+          const goldAlpha = (1 - focalDist / MOUSE_RADIUS) * (mouse.active ? 0.32 : 0.22);
+          ctx.strokeStyle = `rgba(201,168,76,${goldAlpha.toFixed(3)})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(focalX, focalY);
+          ctx.stroke();
         }
       }
 
-      ctx.fillStyle = "rgba(88,166,255,0.55)";
       for (const node of nodes) {
+        ctx.fillStyle = "rgba(88,166,255,0.85)";
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 1.6, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, 2.0, 0, Math.PI * 2);
         ctx.fill();
       }
 

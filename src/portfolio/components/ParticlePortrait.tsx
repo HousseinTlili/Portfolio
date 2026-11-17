@@ -17,9 +17,18 @@ interface Orb {
   color: string;
 }
 
+interface Spark {
+  angle: number;
+  dist: number;
+  speed: number;
+  radius: number;
+  alpha: number;
+  pulse: number;
+}
+
 const ORB_BUDGET = 3200;
-const ASSEMBLE_START = 1.25;
-const ASSEMBLE_LENGTH = 0.9;
+const ASSEMBLE_START = 0.4;
+const ASSEMBLE_LENGTH = 1.35;
 const HOVER_RADIUS = 95;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
@@ -29,7 +38,8 @@ const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 /**
  * Full-section canvas: tiny orbs fly in from all around the hero, gather on the
  * anchor element, then hand over to the full-resolution cut-out portrait.
- * Hovering dissolves the area under the cursor back into orbs.
+ * When scrolled into view on mobile or desktop, the gathering animation plays.
+ * Tapping or clicking the portrait re-triggers the particle assembly.
  */
 export default function ParticlePortrait({
   imageSrc,
@@ -49,9 +59,8 @@ export default function ParticlePortrait({
     const anchor = anchorRef.current;
     if (!canvas || !ctx || !container || !anchor) return;
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const image = new Image();
-    image.decoding = "async";
+    image.crossOrigin = "anonymous";
 
     let width = 0;
     let height = 0;
@@ -59,12 +68,27 @@ export default function ParticlePortrait({
     const box = { x: 0, y: 0, w: 0, h: 0 };
     let builtFor = "";
     let orbs: Orb[] = [];
+    const sparks: Spark[] = [];
     let loaded = false;
+    let started = false;
     let startTime = 0;
     let frame = 0;
     let visible = true;
+    let isAnchorInView = false;
     let hover = 0;
     const mouse = { x: -9999, y: -9999, inside: false };
+
+    // Initialize 28 subtle ambient orbiting sparks around the portrait
+    for (let i = 0; i < 28; i += 1) {
+      sparks.push({
+        angle: Math.random() * Math.PI * 2,
+        dist: 0.85 + Math.random() * 0.35,
+        speed: (Math.random() - 0.5) * 0.015,
+        radius: 1.0 + Math.random() * 1.5,
+        alpha: 0.25 + Math.random() * 0.45,
+        pulse: Math.random() * Math.PI * 2,
+      });
+    }
 
     const measure = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -82,9 +106,9 @@ export default function ParticlePortrait({
       box.h = a.height;
     };
 
-    const build = () => {
+    const build = (force = false) => {
       const key = `${Math.round(box.w)}x${Math.round(box.h)}`;
-      if (!loaded || key === builtFor || box.w < 10) return;
+      if (!loaded || (!force && key === builtFor) || box.w < 10) return;
       builtFor = key;
 
       const sampleW = Math.round(box.w);
@@ -102,10 +126,10 @@ export default function ParticlePortrait({
       const budget = width < 768 ? 1600 : ORB_BUDGET;
       const stride = Math.max(2, Math.sqrt(opaque / budget));
 
-      const span = Math.max(width, height);
+      // Keep spread constrained within visible viewport on mobile
+      const maxSpread = Math.min(Math.max(sampleW, sampleH) * 2.2, Math.max(width, 420));
       const centerX = sampleW / 2;
       const centerY = sampleH / 2;
-      const settled = startTime > 0 && performance.now() - startTime > 4000;
       const next: Orb[] = [];
 
       for (let y = stride / 2; y < sampleH; y += stride) {
@@ -116,7 +140,7 @@ export default function ParticlePortrait({
           if ((data[index + 3] ?? 0) < 140) continue;
 
           const angle = Math.random() * Math.PI * 2;
-          const distance = span * (0.45 + Math.random() * 0.75);
+          const distance = maxSpread * (0.35 + Math.random() * 0.65);
           const sx = centerX + Math.cos(angle) * distance;
           const sy = centerY + Math.sin(angle) * distance;
           const swirl = (Math.random() - 0.5) * distance * 0.7;
@@ -131,13 +155,13 @@ export default function ParticlePortrait({
             sy,
             cx: (sx + px) / 2 - Math.sin(angle) * swirl,
             cy: (sy + py) / 2 + Math.cos(angle) * swirl,
-            x: settled ? px : sx,
-            y: settled ? py : sy,
+            x: sx,
+            y: sy,
             vx: 0,
             vy: 0,
-            delay: Math.random() * 0.55,
-            duration: 0.95 + Math.random() * 0.65,
-            radius: 0.55 + Math.random() * 0.9,
+            delay: Math.random() * 0.45,
+            duration: 0.85 + Math.random() * 0.5,
+            radius: 0.65 + Math.random() * 0.9,
             color: `rgb(${Math.min(255, r + 18)},${Math.min(255, g + 22)},${Math.min(255, b + 34)})`,
           });
         }
@@ -147,11 +171,10 @@ export default function ParticlePortrait({
 
     const draw = (time: number) => {
       const t = startTime ? (time - startTime) / 1000 : 0;
-      const assembly = reducedMotion
-        ? 1
-        : easeOutCubic(clamp01((t - ASSEMBLE_START) / ASSEMBLE_LENGTH));
+      const assembly = easeOutCubic(clamp01((t - ASSEMBLE_START) / ASSEMBLE_LENGTH));
       const orbAlpha = 1 - assembly;
-      let active = assembly < 1 || hover > 0.002;
+      // Keep animation alive during assembly, hover, or for ambient sparks
+      let active = assembly < 1 || hover > 0.002 || (assembly >= 1 && visible);
 
       hover += ((mouse.inside ? 1 : 0) - hover) * 0.12;
       if (hover < 0.002) hover = 0;
@@ -161,7 +184,7 @@ export default function ParticlePortrait({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
-      // Crisp portrait, drawn from the full-resolution source.
+      // Crisp portrait, drawn from full-resolution source
       if (assembly > 0) {
         ctx.save();
         ctx.imageSmoothingQuality = "high";
@@ -198,57 +221,81 @@ export default function ParticlePortrait({
         ctx.restore();
       }
 
-      if (reducedMotion && hover === 0) return false;
+      // Draw assembling particles
+      if (assembly < 1 || hover > 0) {
+        for (const orb of orbs) {
+          const progress = clamp01((t - orb.delay) / orb.duration);
+          let alpha = orbAlpha;
 
-      for (const orb of orbs) {
-        const progress = reducedMotion ? 1 : clamp01((t - orb.delay) / orb.duration);
-        let alpha = orbAlpha;
-
-        if (progress < 1) {
-          const e = easeInOutCubic(progress);
-          const inv = 1 - e;
-          orb.x = inv * inv * orb.sx + 2 * inv * e * orb.cx + e * e * orb.tx;
-          orb.y = inv * inv * orb.sy + 2 * inv * e * orb.cy + e * e * orb.ty;
-          alpha = Math.min(1, progress * 3) * orbAlpha;
-        } else {
-          if (hover > 0) {
-            const dx = orb.x - localMouseX;
-            const dy = orb.y - localMouseY;
-            const distance = Math.hypot(dx, dy);
-            if (distance < HOVER_RADIUS * 0.8 && distance > 0.01) {
-              const force = ((HOVER_RADIUS * 0.8 - distance) / (HOVER_RADIUS * 0.8)) * hover;
-              orb.vx += (dx / distance) * force * 1.6;
-              orb.vy += (dy / distance) * force * 1.6;
+          if (progress < 1) {
+            const e = easeInOutCubic(progress);
+            const inv = 1 - e;
+            orb.x = inv * inv * orb.sx + 2 * inv * e * orb.cx + e * e * orb.tx;
+            orb.y = inv * inv * orb.sy + 2 * inv * e * orb.cy + e * e * orb.ty;
+            alpha = Math.min(1, progress * 3.5) * orbAlpha;
+          } else {
+            if (hover > 0) {
+              const dx = orb.x - localMouseX;
+              const dy = orb.y - localMouseY;
+              const distance = Math.hypot(dx, dy);
+              if (distance < HOVER_RADIUS * 0.8 && distance > 0.01) {
+                const force = ((HOVER_RADIUS * 0.8 - distance) / (HOVER_RADIUS * 0.8)) * hover;
+                orb.vx += (dx / distance) * force * 1.6;
+                orb.vy += (dy / distance) * force * 1.6;
+              }
+              const hole = clamp01(
+                1 - Math.hypot(orb.tx - localMouseX, orb.ty - localMouseY) / HOVER_RADIUS,
+              );
+              alpha = Math.max(alpha, hole * hover * 1.4);
             }
-            const hole = clamp01(
-              1 - Math.hypot(orb.tx - localMouseX, orb.ty - localMouseY) / HOVER_RADIUS,
-            );
-            alpha = Math.max(alpha, hole * hover * 1.4);
+            orb.vx = (orb.vx + (orb.tx - orb.x) * 0.08) * 0.8;
+            orb.vy = (orb.vy + (orb.ty - orb.y) * 0.08) * 0.8;
+            orb.x += orb.vx;
+            orb.y += orb.vy;
+            const displacement = Math.abs(orb.x - orb.tx) + Math.abs(orb.y - orb.ty);
+            if (displacement > 0.3) {
+              active = true;
+              alpha = Math.max(alpha, Math.min(1, displacement / 5));
+            }
           }
-          orb.vx = (orb.vx + (orb.tx - orb.x) * 0.08) * 0.8;
-          orb.vy = (orb.vy + (orb.ty - orb.y) * 0.08) * 0.8;
-          orb.x += orb.vx;
-          orb.y += orb.vy;
-          const displacement = Math.abs(orb.x - orb.tx) + Math.abs(orb.y - orb.ty);
-          if (displacement > 0.3) {
-            active = true;
-            alpha = Math.max(alpha, Math.min(1, displacement / 5));
-          }
-        }
 
-        if (alpha < 0.03) continue;
-        ctx.globalAlpha = Math.min(1, alpha);
-        ctx.fillStyle = orb.color;
-        ctx.beginPath();
-        ctx.arc(
-          box.x + orb.x,
-          box.y + orb.y,
-          progress < 1 ? orb.radius * 1.25 : orb.radius,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
+          if (alpha < 0.03) continue;
+          ctx.globalAlpha = Math.min(1, alpha);
+          ctx.fillStyle = orb.color;
+          ctx.beginPath();
+          ctx.arc(
+            box.x + orb.x,
+            box.y + orb.y,
+            progress < 1 ? orb.radius * 1.3 : orb.radius,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
       }
+
+      // Draw subtle ambient sparks around the portrait halo
+      if (assembly >= 0.8 && box.w > 10) {
+        const cX = box.x + box.w / 2;
+        const cY = box.y + box.h * 0.45;
+        const baseR = box.w * 0.52;
+
+        for (const spark of sparks) {
+          spark.angle += spark.speed;
+          spark.pulse += 0.03;
+          const currentR = baseR * spark.dist + Math.sin(spark.pulse) * 6;
+          const sX = cX + Math.cos(spark.angle) * currentR;
+          const sY = cY + Math.sin(spark.angle) * currentR * 0.95;
+          const a = spark.alpha * (0.6 + 0.4 * Math.sin(spark.pulse));
+
+          ctx.globalAlpha = Math.min(1, a);
+          ctx.fillStyle = spark.angle > Math.PI ? "rgba(88,166,255,0.85)" : "rgba(201,168,76,0.85)";
+          ctx.beginPath();
+          ctx.arc(sX, sY, spark.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       ctx.globalAlpha = 1;
       return active;
     };
@@ -261,6 +308,14 @@ export default function ParticlePortrait({
 
     const kick = () => {
       if (!frame && loaded && visible) frame = requestAnimationFrame(loop);
+    };
+
+    const checkAndStart = () => {
+      if (loaded && isAnchorInView && !started) {
+        started = true;
+        startTime = performance.now();
+      }
+      kick();
     };
 
     const onResize = () => {
@@ -287,24 +342,48 @@ export default function ParticlePortrait({
       kick();
     };
 
-    image.onload = () => {
-      loaded = true;
-      measure();
-      build();
+    // Clicking / tapping portrait re-scatters and gathers particles
+    const onClickAnchor = () => {
+      build(true);
       startTime = performance.now();
       kick();
     };
+
+    const onImageReady = () => {
+      loaded = true;
+      measure();
+      build();
+      checkAndStart();
+    };
+
+    image.onload = onImageReady;
     image.src = imageSrc;
+    if (image.complete) {
+      onImageReady();
+    }
 
     measure();
     const resizeObserver = new ResizeObserver(onResize);
     resizeObserver.observe(container);
     resizeObserver.observe(anchor);
+
+    // Section visibility
     const intersection = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? true;
       if (visible) kick();
     });
     intersection.observe(container);
+
+    // Anchor visibility: trigger the dot-gathering animation when user reaches the portrait!
+    const anchorIntersection = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        isAnchorInView = true;
+        checkAndStart();
+      }
+    }, { threshold: 0.1 });
+    anchorIntersection.observe(anchor);
+
+    anchor.addEventListener("click", onClickAnchor);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerMove, { passive: true });
     window.addEventListener("pointerup", onPointerLeave, { passive: true });
@@ -315,6 +394,8 @@ export default function ParticlePortrait({
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       intersection.disconnect();
+      anchorIntersection.disconnect();
+      anchor.removeEventListener("click", onClickAnchor);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerMove);
       window.removeEventListener("pointerup", onPointerLeave);

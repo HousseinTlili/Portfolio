@@ -488,18 +488,18 @@
     width: 96%;
     aspect-ratio: 1;
     margin-left: -48%;
-    border: 1px dashed rgba(88, 166, 255, 0.22);
+    border: 1px dashed rgba(88, 166, 255, 0.32);
     border-radius: 50%;
-    animation: pf-spin 60s linear infinite;
+    animation: pf-spin 26s linear infinite;
   }
 
   .pf-portrait-ring.is-inner {
     top: 14%;
     width: 74%;
     margin-left: -37%;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     animation-direction: reverse;
-    animation-duration: 90s;
+    animation-duration: 40s;
   }
 
   .pf-portrait-ring.is-inner::after {
@@ -542,22 +542,24 @@
   .pf-float-chip {
     position: absolute;
     z-index: 2;
-    display: none;
-    padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: block;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    color: rgba(230, 237, 243, 0.85);
+    color: rgba(230, 237, 243, 0.9);
     background: rgba(12, 18, 29, 0.92);
     box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.7);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
     white-space: nowrap;
-    animation: pf-float 6s ease-in-out infinite;
+    animation: pf-float 5s ease-in-out infinite;
   }
 
-  @media (min-width: 1100px) {
+  @media (min-width: 768px) {
     .pf-float-chip {
-      display: block;
+      padding: 8px 14px;
+      font-size: 11px;
+      animation-duration: 6s;
     }
   }
 
@@ -1310,14 +1312,6 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 
   .pf-reveal {
