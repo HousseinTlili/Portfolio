@@ -38,65 +38,68 @@ const contactItems = [
 const skillGroups = [
   { label: "Langages", value: "C# · Java · Python · TypeScript · Rust · Dart · SQL" },
   { label: "Backend", value: ".NET / ASP.NET Core · Spring Boot · FastAPI · Node.js" },
-  { label: "Frontend & Mobile", value: "Angular · React · Next.js · Flutter · Tailwind CSS" },
+  { label: "Frontend & Mobile", value: "Angular · React 19 · Flutter · Tailwind CSS" },
   {
     label: "Cloud & DevOps",
     value: "AWS (Fundamentals) · Docker · Kubernetes · Jenkins · GitHub Actions",
   },
-  { label: "Données", value: "PostgreSQL · MongoDB · Redis · SQLite · Neo4j · ChromaDB" },
-  {
-    label: "IA & Agents",
-    value: "RAG · GraphRAG · LangGraph · QLoRA · LLM locaux (Ollama)",
-  },
+  { label: "Bases de données", value: "PostgreSQL · MongoDB · Redis · SQLite · Neo4j · ChromaDB" },
   {
     label: "Messaging & Observabilité",
     value: "RabbitMQ · Prometheus · Grafana · SonarQube",
+  },
+  {
+    label: "IA / ML",
+    value: "LLM multi-fournisseurs & modèles locaux (Ollama) · RAG, GraphRAG · QLoRA · LangGraph",
+  },
+  {
+    label: "Desktop",
+    value: "Tauri v2 (Rust) · PyQt6",
   },
 ];
 
 const projects = [
   {
-    name: "Kairos — Assistant IA de bureau avec contrôle des actions",
+    name: "SahTek — Plateforme de santé",
+    tag: "Flutter · React · FastAPI",
     description:
-      "Aide l’utilisateur à interagir avec ses applications et son navigateur, tout en soumettant les actions sensibles à une approbation explicite et en conservant un journal local vérifiable.",
-    stack: "Tauri · Rust · React · Hermes Agent · 740+ tests automatisés rapportés · pré-version",
+      "App mobile Flutter (~23 000 lignes) et portail médecin React ; backend FastAPI + PostgreSQL + Redis. Verrouillage distribué des créneaux (mutex Redis), replanification automatique, moteur clinique (PHQ-9, GAD-7…).",
+    stack: "Flutter · React · FastAPI · PostgreSQL · Redis",
   },
   {
-    name: "SahTek — Plateforme de gestion de cabinet médical (web + mobile)",
+    name: "CampConnect — Plateforme universitaire",
+    tag: "Spring Boot · Angular · MongoDB",
     description:
-      "Aide les médecins à centraliser les dossiers patients, organiser les rendez-vous et structurer les échanges cliniques selon leurs spécialités. Une API unique alimente le site patient (ar/fr), l’espace médecin, un back-office d’administration et l’application mobile.",
-    stack: "Next.js · React · Flutter · FastAPI · PostgreSQL · Redis · Docker Compose",
+      "12 modules métier · CI/CD Jenkins · SonarQube · Kubernetes (6 nœuds) · Prometheus + Grafana.",
+    stack: "Spring Boot · Angular · MongoDB · Kubernetes · Docker",
   },
   {
-    name: "CampConnect — Plateforme de camping et d’aventure en Tunisie",
+    name: "CarbonOS — Bilan carbone GES",
+    tag: "FastAPI + microservice ML",
     description:
-      "Centralise la découverte de campings, les réservations, la planification de sorties et la location d’équipements.",
-    stack:
-      "Spring Boot · Angular · MongoDB · 12 modules métier · Jenkins · Kubernetes · Prometheus · Grafana",
+      "Plateforme visant la conformité ISO 14064-1 · FastAPI, PostgreSQL, microservice ML Flask.",
+    stack: "FastAPI · PostgreSQL · Flask (ML) · Docker",
   },
   {
-    name: "SGH — Système de gestion hospitalière",
+    name: "Jarvis — Assistant IA de bureau",
+    tag: "Tauri/Rust + React + FastAPI",
     description:
-      "Coordonne les étapes du parcours hospitalier, de l’admission aux consultations, analyses de laboratoire et pharmacie, à travers des services distribués.",
-    stack: "Microservices · RabbitMQ · Keycloak · PostgreSQL · Angular",
+      "12 outils autonomes, RAG ChromaDB, routage multi-modèles (OpenAI, Gemini, Anthropic, Ollama), TTS local.",
+    stack: "Tauri · Rust · React · ChromaDB · Ollama · Whisper",
   },
   {
-    name: "Jarvis — Assistant IA local pour ordinateur",
+    name: "Cothon — Station de travail souveraine",
+    tag: "Tauri v2 + React 19",
     description:
-      "Permet de rechercher dans les documents, d’interagir par la voix et d’automatiser certaines tâches locales et planifiées.",
-    stack: "RAG · ChromaDB · Whisper · Kokoro TTS · Ollama · Tauri · React · FastAPI",
+      "Backend Rust, recherche plein texte SQLite FTS5, planificateur SM-2, lecture PDF native.",
+    stack: "Tauri v2 · Rust · React 19 · SQLite FTS5",
   },
   {
-    name: "Cothon — Espace de travail et de productivité pour étudiants",
+    name: "Navis Browser — Fork de Zen Browser",
+    tag: "Gecko · C++ · JavaScript",
     description:
-      "Centralise cours, notes et fichiers, facilite les révisions avec répétition espacée et permet d’interroger des PDF avec une IA contextuelle.",
-    stack: "Tauri v2 · Rust · React · SQLite",
-  },
-  {
-    name: "CarbonOS — Plateforme de bilan carbone",
-    description:
-      "Aide les organisations à structurer le suivi de leurs émissions de gaz à effet de serre et leur démarche de conformité ISO 14064-1.",
-    stack: "FastAPI · PostgreSQL · microservice ML",
+      "HTTPS-only, uBlock Origin, sidebar IA locale Ollama + fallback Anthropic API.",
+    stack: "Gecko · C++ · JavaScript · Ollama · Anthropic API",
   },
 ];
 
@@ -158,7 +161,7 @@ export default function Resume() {
           </div>
 
           <section className="sidebar-section">
-            <h2>Contact</h2>
+            <h2>Coordonnées</h2>
             <div className="contact-list">
               {contactItems.map(({ icon: Icon, label, href }) => {
                 const content = (
@@ -184,7 +187,7 @@ export default function Resume() {
           </section>
 
           <section className="sidebar-section skills-section">
-            <h2>Expertise</h2>
+            <h2>Compétences</h2>
             <div className="skills-list">
               {skillGroups.map((skill) => (
                 <div key={skill.label}>
@@ -221,21 +224,21 @@ export default function Resume() {
               <span className="monogram">TH</span>
               <span className="status-pill">
                 <Sparkles size={11} />
-                Disponible dès jan. 2027
+                Disponible dès janv. 2027
               </span>
             </div>
             <h1>
               Tlili <span>Houssein</span>
             </h1>
-            <p className="role">Étudiant Ingénieur Logiciel — Dernière année à ESPRIT</p>
-            <p className="objective">
-              En recherche d’un <strong>PFE de 6 mois à partir de janvier 2027</strong>
+            <p className="role">
+              Étudiant Ingénieur Logiciel — Dernière année à ESPRIT · En recherche d’un PFE de 6 mois
             </p>
             <div className="hero-summary">
               Étudiant ingénieur en dernière année à ESPRIT, spécialisé en génie logiciel.
-              Expérience en IA appliquée, systèmes distribués, développement full-stack et DevOps,
-              consolidée par deux stages en entreprise. Je conçois des outils qui simplifient les
-              processus métier, centralisent l’information et automatisent les tâches.
+              Expérience en systèmes distribués, développement full-stack et DevOps,
+              consolidée par deux stages en entreprise. Recherche un PFE de 6 mois en développement
+              logiciel, avec la perspective d’un poste à l’issue du stage. Passionné par l’IA
+              appliquée et le développement d’outils sur mesure.
             </div>
             <div className="impact-row">
               <div>
@@ -247,14 +250,14 @@ export default function Resume() {
                 <span>score d’évaluation IA</span>
               </div>
               <div>
-                <strong>740+</strong>
-                <span>tests automatisés</span>
+                <strong>2 stages</strong>
+                <span>Attijari Bank &amp; COFAT</span>
               </div>
             </div>
           </header>
 
           <section>
-            <SectionTitle icon={BriefcaseBusiness}>Expérience</SectionTitle>
+            <SectionTitle icon={BriefcaseBusiness}>Expérience professionnelle</SectionTitle>
             <div className="timeline">
               <article className="timeline-item">
                 <span className="timeline-dot" />
@@ -266,16 +269,11 @@ export default function Resume() {
                   <time>Juil. — Août 2026</time>
                 </div>
                 <p>
-                  Conception de <strong>KUSOR</strong>, plateforme d’IA souveraine aidant les
-                  équipes conformité à rechercher, comprendre et analyser les textes réglementaires
-                  de la Banque Centrale de Tunisie, avec des modules KYC et AML. L’analyse d’un
-                  dossier passe de jusqu’à 4 h à moins de 30 s.
+                  Conception de <strong>KUSOR</strong>, plateforme d’IA souveraine de veille réglementaire pour la Banque Centrale de Tunisie (BCT), avec modules KYC et AML.
                 </p>
                 <p>
-                  Recherche hybride : BM25, recherche vectorielle, graphe temporel Neo4j, recherche
-                  structurée d’obligations, fusion RRF, Cross-Encoder et LangGraph. Fine-tuning Qwen
-                  2.5-7B (QLoRA), Angular (14 modules) et journalisation d’audit SHA-256 — 97,96 %
-                  sur le benchmark d’évaluation.
+                  Moteur GraphRAG hybride 4 canaux (BM25, Dense, Neo4j) · RRF · Cross-Encoder · LangGraph.
+                  Fine-tuning Qwen-2.5-7B (QLoRA) · frontend Angular 21 (14 modules) · audit SHA-256.
                 </p>
               </article>
 
@@ -289,45 +287,43 @@ export default function Resume() {
                   <time>Juil. — Août 2025</time>
                 </div>
                 <p>
-                  Développement d’<strong>AlertingSys</strong>, solution de supervision industrielle
-                  qui détecte les anomalies et déclenche des alertes en temps réel pour faciliter le
-                  suivi des équipements et la maintenance.
+                  Conception d’<strong>AlertingSys</strong>, alertes temps réel en architecture microservices .NET + RabbitMQ.
                 </p>
                 <p className="tech-line">
-                  Microservices .NET · RabbitMQ · moteur ML Python · dashboard Angular · Docker
-                  Compose
+                  Moteur ML Python · dashboard Angular de monitoring · Docker Compose
                 </p>
               </article>
             </div>
           </section>
 
           <section>
-            <SectionTitle icon={GraduationCap}>Formation & certifications</SectionTitle>
+            <SectionTitle icon={GraduationCap}>Formation &amp; Certifications</SectionTitle>
             <div className="education-grid">
               <article>
-                <time>2024 — présent</time>
+                <time>2024 — en cours</time>
                 <h3>Cycle Ingénieur en Génie Logiciel</h3>
                 <p>ESPRIT · Tunis</p>
               </article>
               <article>
                 <time>2020 — 2024</time>
-                <h3>Licence en Automatisme & Informatique Industrielle</h3>
+                <h3>Licence en Automatisme et Informatique Industrielle</h3>
                 <p>ISET</p>
               </article>
             </div>
             <p className="certifications">
-              <span>AWS Cloud Fundamentals (ESPRIT)</span>
+              <span>AWS Cloud Fundamentals (formation via ESPRIT)</span>
               <span>Certification Blockchain</span>
             </p>
           </section>
 
           <section className="projects-section">
-            <SectionTitle icon={Sparkles}>Projets sélectionnés</SectionTitle>
+            <SectionTitle icon={Sparkles}>Projets techniques</SectionTitle>
             <div className="project-grid">
               {projects.map((project) => (
                 <article className="project-card" key={project.name}>
                   <div className="project-heading">
                     <h3>{project.name}</h3>
+                    <span>{project.tag}</span>
                   </div>
                   <p>{project.description}</p>
                   <small>{project.stack}</small>
